@@ -1,13 +1,30 @@
 package main
 
-import "github.com/gofiber/fiber/v2"
+import (
+	"log"
+
+	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/middleware/cors"
+	"github.com/gofiber/fiber/v2/middleware/helmet"
+	"github.com/gofiber/fiber/v2/middleware/logger"
+	"github.com/joho/godotenv"
+
+	"hospit-soft-backend/internal/delivery/http"
+	"hospit-soft-backend/internal/infrastructure/database"
+)
 
 func main() {
+	_ = godotenv.Load(".env")
+
+	database.Connect()
+
 	app := fiber.New()
 
-	app.Get("/", func(c *fiber.Ctx) error {
-		return c.SendString("Hello, World!")
-	})
+	app.Use(cors.New())
+	app.Use(helmet.New())
+	app.Use(logger.New())
 
-	app.Listen(":3000")
+	http.Router(app)
+
+	log.Fatal(app.Listen(":3000"))
 }
